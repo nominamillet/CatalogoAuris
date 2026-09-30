@@ -84,9 +84,10 @@
         color: white;
       }
 
+      /* Grid adaptable: 4 columnas en pantallas grandes */
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 16px;
       }
 
@@ -310,8 +311,31 @@
       }
       #errorState { color: #c62828; }
 
-      @media (max-width: 768px) {
-        .modal-body { grid-template-columns: 1fr; }
+      /* Ajustes para tabletas y computadoras pequeñas */
+      @media (max-width: 992px) {
+        .grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      /* Ajustes para celulares (2 productos por fila) */
+      @media (max-width: 600px) {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px; /* Reducimos espacio entre tarjetas en celular */
+        }
+
+        .card-content {
+          padding: 10px; /* Ajuste para que aproveche mejor el espacio */
+        }
+
+        .product-image-button img, .no-image {
+          height: 160px; /* Imagen ligeramente más corta para celulares */
+        }
+
+        .modal-body { 
+          grid-template-columns: 1fr; 
+        }
       }
     </style>
   </head>
@@ -678,7 +702,7 @@
         renderCartItems();
       }
 
-      /* Envío de Mensajes por WhatsApp */
+/* Envío de Mensajes por WhatsApp */
       function pedirIndividualWhatsApp(index) {
         const p = productos[index];
         const nombrePersona = prompt("A nombre de quien va el pedido:");
@@ -703,8 +727,8 @@
           mensaje += `\n${p.TextoEnvio}`;
         }
 
-        // Se redirige en la misma pestaña o usando la ubicación para evitar el bloqueo del navegador
-        window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`;
+        // Se usa api.whatsapp.com para forzar la apertura directa de la App en celulares
+        window.location.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(mensaje)}`;
       }
 
       function sendCartToWhatsApp() {
@@ -745,8 +769,8 @@
           mensaje += `\n${primerProd.TextoEnvio}`;
         }
 
-        // Al usar window.location.href, WhatsApp o la app móvil se abrirán sin ser bloqueados por el navegador
-        window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`;
+        // Se usa api.whatsapp.com para forzar la apertura directa de la App en celulares
+        window.location.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(mensaje)}`;
       }
 
       function escapeHtml(text) {
