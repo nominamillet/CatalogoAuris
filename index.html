@@ -37,13 +37,8 @@
         padding: 20px;
       }
 
-      .hero h1 {
-        margin: 0 0 8px;
-      }
-
-      .hero p {
-        margin: 6px 0;
-      }
+      .hero h1 { margin: 0 0 8px; }
+      .hero p { margin: 6px 0; }
 
       .section-header {
         display: flex;
@@ -57,7 +52,7 @@
         margin: 0;
       }
 
-      /* Etiquetas / Filtros */
+      /* Filtros */
       .filters-container {
         display: flex;
         flex-wrap: wrap;
@@ -75,16 +70,10 @@
         transition: all 0.2s ease;
       }
 
-      .filter-pill:hover {
-        background: #d0d0d0;
-      }
+      .filter-pill:hover { background: #d0d0d0; }
+      .filter-pill.active { background: #0b57d0; color: white; }
 
-      .filter-pill.active {
-        background: #0b57d0;
-        color: white;
-      }
-
-      /* Grid adaptable: 4 columnas en pantallas grandes */
+      /* Grid 4 columnas PC */
       .grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -112,7 +101,7 @@
 
       .product-image-button img {
         width: 100%;
-        height: 220px;
+        height: 200px;
         object-fit: cover;
         display: block;
       }
@@ -142,17 +131,14 @@
         margin: 8px 0 4px;
       }
 
-      .product-stock,
-      .modal-stock {
+      .product-stock, .modal-stock {
         margin: 0 0 12px;
         font-size: 13px;
         font-weight: 700;
       }
 
-      .product-stock.disponible,
-      .modal-stock.disponible { color: #0f7b0f; }
-      .product-stock.agotado,
-      .modal-stock.agotado { color: #c62828; }
+      .product-stock.disponible, .modal-stock.disponible { color: #0f7b0f; }
+      .product-stock.agotado, .modal-stock.agotado { color: #c62828; }
 
       .card-actions {
         margin-top: auto;
@@ -176,11 +162,7 @@
         box-sizing: border-box;
       }
 
-      .button-secondary {
-        background: #25D366;
-        color: white;
-      }
-
+      .button-secondary { background: #25D366; color: white; }
       .button-secondary:hover { background: #1ebc57; }
       .button:hover { opacity: 0.92; }
 
@@ -193,7 +175,7 @@
         justify-content: center;
         color: #666;
       }
-      .no-image { height: 220px; width: 100%; }
+      .no-image { height: 200px; width: 100%; }
       .no-banner { height: 280px; }
 
       /* Modales */
@@ -239,23 +221,9 @@
         z-index: 10;
       }
 
-      .modal-body {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .modal-image-wrap {
-        background: #f2f2f2;
-        min-height: 300px;
-      }
-
-      .modal-image-wrap img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-
+      .modal-body { display: grid; grid-template-columns: 1fr 1fr; }
+      .modal-image-wrap { background: #f2f2f2; min-height: 300px; }
+      .modal-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
       .modal-info { padding: 24px; }
       .modal-title { font-size: 24px; margin: 0 0 8px; }
       .modal-price { font-size: 24px; font-weight: bold; margin: 10px 0; }
@@ -281,7 +249,7 @@
         z-index: 999;
       }
 
-      /* Carrito de Compras Modal Structure */
+      /* Elementos Carrito */
       .cart-item {
         display: flex;
         align-items: center;
@@ -311,31 +279,16 @@
       }
       #errorState { color: #c62828; }
 
-      /* Ajustes para tabletas y computadoras pequeñas */
+      /* Adaptabilidad Responsiva */
       @media (max-width: 992px) {
-        .grid {
-          grid-template-columns: repeat(3, 1fr);
-        }
+        .grid { grid-template-columns: repeat(3, 1fr); }
       }
 
-      /* Ajustes para celulares (2 productos por fila) */
       @media (max-width: 600px) {
-        .grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 10px; /* Reducimos espacio entre tarjetas en celular */
-        }
-
-        .card-content {
-          padding: 10px; /* Ajuste para que aproveche mejor el espacio */
-        }
-
-        .product-image-button img, .no-image {
-          height: 160px; /* Imagen ligeramente más corta para celulares */
-        }
-
-        .modal-body { 
-          grid-template-columns: 1fr; 
-        }
+        .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .card-content { padding: 10px; }
+        .product-image-button img, .no-image { height: 150px; }
+        .modal-body { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -359,7 +312,6 @@
 
       <div class="section-header">
         <h2 class="section-title">Nuestros Productos</h2>
-        <!-- Etiquetas / Filtros -->
         <div class="filters-container" id="filtersContainer"></div>
       </div>
 
@@ -405,14 +357,14 @@
           </div>
         </div>
 
-        <button class="button button-secondary" onclick="sendCartToWhatsApp()">
+        <button id="btnCartSendWa" class="button button-secondary" onclick="sendCartToWhatsApp()">
           Enviar Pedido por WhatsApp
         </button>
       </div>
     </div>
 
     <script>
-      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqb952JjGuArJBqOBrwA7Hm8b2bawaje17zFG7XwN5PCgAr45S-hL4JkmoxJ4x8Kkx/exec';
+      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFlcYb4lCJZTdAqCteeJlm2tz7QRKds5jZSg9VA8X52ixbzhuuHrpmDzkrAexggEf8/exec';
 
       let productos = [];
       let datosCatalogo = null;
@@ -460,7 +412,6 @@
 
         document.title = data.catalogo.NombreCatalogo || 'Catálogo';
 
-        // Banner y Hero
         const heroBanner = document.getElementById('heroBanner');
         if (data.catalogo.ImagenPortadaURL) {
           heroBanner.innerHTML = `<img src="${escapeHtml(data.catalogo.ImagenPortadaURL)}" alt="Banner">`;
@@ -494,14 +445,11 @@
         renderProducts();
       }
 
-      /* Generar Etiquetas de Filtros */
       function buildFilters() {
         const container = document.getElementById('filtersContainer');
         container.innerHTML = '';
 
         const listaFiltros = ['Todos los productos', 'Nuevo', 'Oferta'];
-
-        // Extraer categorías dinámicas (Columna D - CategoriaID)
         const categoriasUnicas = [...new Set(productos.map(p => p.CategoriaID).filter(Boolean))];
         categoriasUnicas.forEach(cat => {
           if (!listaFiltros.includes(cat)) {
@@ -523,7 +471,6 @@
         });
       }
 
-      /* Renderizar Tarjetas de Productos */
       function renderProducts() {
         const grid = document.getElementById('productsGrid');
         grid.innerHTML = '';
@@ -579,7 +526,6 @@
         });
       }
 
-      /* Modal de Producto */
       function openProductModal(index) {
         const p = productos[index];
         if (!p) return;
@@ -622,7 +568,6 @@
         if (event.target.id === modalId) closeModal(modalId);
       }
 
-      /* Funciones de Carrito */
       function addToCart(index) {
         const prod = productos[index];
         const itemExistente = carrito.find(item => item.producto.NombreProducto === prod.NombreProducto);
@@ -663,7 +608,7 @@
         let total = 0;
 
         carrito.forEach((item, index) => {
-          const precioNum = Number(String(item.producto.PrecioMostrar).replace(/[^0-9.-]/g, '')) || 0;
+          const precioNum = Number(String(item.producto.Precio_PUBLICO || item.producto.PrecioMostrar).replace(/[^0-9.-]/g, '')) || 0;
           const subtotal = precioNum * item.cantidad;
           total += subtotal;
 
@@ -702,8 +647,33 @@
         renderCartItems();
       }
 
-/* Envío de Mensajes por WhatsApp */
-      function pedirIndividualWhatsApp(index) {
+      /* Envío de datos al Servidor (POST) */
+      async function guardarPedidoEnServidor(nombreCliente, items) {
+        const payload = {
+          action: 'registrarPedido',
+          clienteNombre: nombreCliente,
+          items: items.map(i => ({
+            productoID: i.producto.ProductoID,
+            descripcionCorta: i.producto.DescripcionCorta || i.producto.NombreProducto,
+            precio: Number(String(i.producto.Precio_PUBLICO || i.producto.PrecioMostrar).replace(/[^0-9.-]/g, '')) || 0,
+            unidades: i.cantidad
+          }))
+        };
+
+        try {
+          const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          return await response.json();
+        } catch (err) {
+          console.error("Error al registrar pedido:", err);
+          return { ok: false, numeroPedido: 'S/F' };
+        }
+      }
+
+      /* Envío por WhatsApp formato Ticket */
+      async function pedirIndividualWhatsApp(index) {
         const p = productos[index];
         const nombrePersona = prompt("A nombre de quien va el pedido:");
         if (!nombrePersona || !nombrePersona.trim()) return;
@@ -714,24 +684,34 @@
           return;
         }
 
-        let mensaje = `${p.MensajeBase}\n\n`;
-        mensaje += `👤 *A nombre de:* ${nombrePersona.trim()}\n`;
-        mensaje += `📦 *Producto:* ${p.NombreProducto}\n`;
-        mensaje += `💲 *Precio:* ${p.PrecioMostrarTexto}\n`;
+        const items = [{ producto: p, cantidad: 1 }];
+        closeModal('productModal');
 
+        // Guardar pedido y obtener folio
+        const resServidor = await guardarPedidoEnServidor(nombrePersona.trim(), items);
+        const folio = resServidor.numeroPedido || 'S/F';
+
+        // Estructura Ticket WhatsApp
+        let ticket = `🧾 *TICKET DE PEDIDO* 🧾\n`;
+        ticket += `━━━━━━━━━━━━━━━━━━━━\n`;
+        ticket += `🔖 *Folio:* ${folio}\n`;
+        ticket += `👤 *Cliente:* ${nombrePersona.trim()}\n`;
         if (clienteDatos && clienteDatos.NombreCliente) {
-          mensaje += `🏢 *Cliente Registrado:* ${clienteDatos.NombreCliente}\n`;
+          ticket += `🏢 *Registrado:* ${clienteDatos.NombreCliente}\n`;
         }
+        ticket += `━━━━━━━━━━━━━━━━━━━━\n`;
+        ticket += `📦 1x ${p.NombreProducto}\n`;
+        ticket += `💰 *Total:* ${p.PrecioMostrarTexto}\n`;
+        ticket += `━━━━━━━━━━━━━━━━━━━━\n`;
 
         if (p.TextoEnvio) {
-          mensaje += `\n${p.TextoEnvio}`;
+          ticket += `\n${p.TextoEnvio}`;
         }
 
-        // Se usa api.whatsapp.com para forzar la apertura directa de la App en celulares
-        window.location.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(mensaje)}`;
+        window.location.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(ticket)}`;
       }
 
-      function sendCartToWhatsApp() {
+      async function sendCartToWhatsApp() {
         if (carrito.length === 0) return;
 
         const nombrePersona = prompt("A nombre de quien va el pedido:");
@@ -745,32 +725,55 @@
           return;
         }
 
+        // Deshabilitar botón temporalmente para evitar doble clic
+        const btnSend = document.getElementById('btnCartSendWa');
+        btnSend.disabled = true;
+        btnSend.textContent = 'Procesando...';
+
+        // Guardar pedido en servidor
+        const resServidor = await guardarPedidoEnServidor(nombrePersona.trim(), carrito);
+        const folio = resServidor.numeroPedido || 'S/F';
+
         let total = 0;
-        let listaProductos = '';
+        let detalleArticulos = '';
 
         carrito.forEach(item => {
-          const precioNum = Number(String(item.producto.PrecioMostrar).replace(/[^0-9.-]/g, '')) || 0;
+          const precioNum = Number(String(item.producto.Precio_PUBLICO || item.producto.PrecioMostrar).replace(/[^0-9.-]/g, '')) || 0;
           const subtotal = precioNum * item.cantidad;
           total += subtotal;
 
-          listaProductos += `- ${item.cantidad}x ${item.producto.NombreProducto} (${item.producto.PrecioMostrarTexto})\n`;
+          detalleArticulos += `▪ ${item.cantidad}x ${item.producto.NombreProducto}\n  Subtotal: ${subtotal.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}\n`;
         });
 
-        let mensaje = `${primerProd.MensajeBase}\n\n`;
-        mensaje += `👤 *A nombre de:* ${nombrePersona.trim()}\n\n`;
-        mensaje += `📋 *Resumen del Pedido:*\n${listaProductos}\n`;
-        mensaje += `💰 *Total Estimado:* ${total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}\n`;
+        const totalFormateado = total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
 
+        // Cierre automático del modal y reseteo de carrito
+        closeModal('cartModal');
+        carrito = [];
+        updateCartUI();
+
+        // Estructura Ticket WhatsApp
+        let ticket = `🧾 *TICKET DE PEDIDO* 🧾\n`;
+        ticket += `━━━━━━━━━━━━━━━━━━━━\n`;
+        ticket += `🔖 *Folio:* ${folio}\n`;
+        ticket += `👤 *Cliente:* ${nombrePersona.trim()}\n`;
         if (clienteDatos && clienteDatos.NombreCliente) {
-          mensaje += `🏢 *Cliente Registrado:* ${clienteDatos.NombreCliente}\n`;
+          ticket += `🏢 *Registrado:* ${clienteDatos.NombreCliente}\n`;
         }
+        ticket += `━━━━━━━━━━━━━━━━━━━━\n`;
+        ticket += `📋 *DESGLOSE:*\n${detalleArticulos}`;
+        ticket += `━━━━━━━━━━━━━━━━━━━━\n`;
+        ticket += `💰 *TOTAL A PAGAR:* ${totalFormateado}\n`;
+        ticket += `━━━━━━━━━━━━━━━━━━━━\n`;
 
         if (primerProd.TextoEnvio) {
-          mensaje += `\n${primerProd.TextoEnvio}`;
+          ticket += `\n${primerProd.TextoEnvio}`;
         }
 
-        // Se usa api.whatsapp.com para forzar la apertura directa de la App en celulares
-        window.location.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(mensaje)}`;
+        btnSend.disabled = false;
+        btnSend.textContent = 'Enviar Pedido por WhatsApp';
+
+        window.location.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(ticket)}`;
       }
 
       function escapeHtml(text) {
