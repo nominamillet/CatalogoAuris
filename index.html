@@ -165,6 +165,7 @@
       .button-secondary { background: #25D366; color: white; }
       .button-secondary:hover { background: #1ebc57; }
       .button:hover { opacity: 0.92; }
+      .button:disabled { background: #ccc; cursor: not-allowed; }
 
       .muted { color: #666; }
 
@@ -372,14 +373,20 @@
       let textoBotonDefault = 'Pedir por WhatsApp';
       let carrito = [];
       let filtroActual = 'TODOS';
+      let tokenActual = '';
+      let clienteActual = '';
 
       document.addEventListener('DOMContentLoaded', async () => {
         const params = new URLSearchParams(window.location.search);
-        const token = params.get('token') || 'publico2026';
-        const cliente = params.get('cliente') || '';
+        tokenActual = params.get('token') || 'publico2026';
+        clienteActual = params.get('cliente') || '';
 
+        await cargarDatosCatalogo();
+      });
+
+      async function cargarDatosCatalogo() {
         try {
-          const url = `${APPS_SCRIPT_URL}?token=${encodeURIComponent(token)}&cliente=${encodeURIComponent(cliente)}`;
+          const url = `${APPS_SCRIPT_URL}?token=${encodeURIComponent(tokenActual)}&cliente=${encodeURIComponent(clienteActual)}`;
           const response = await fetch(url);
           const data = await response.json();
 
@@ -394,7 +401,7 @@
         } catch (err) {
           showError('Error al conectar con el servidor: ' + err.message);
         }
-      });
+      }
 
       function showError(msg) {
         document.getElementById('loadingState').style.display = 'none';
@@ -501,6 +508,8 @@
                </div>`
             : '';
 
+          const btnAgregarDisabled = p.StockDisponible === false ? 'disabled' : '';
+
           card.innerHTML = `
             <button class="product-image-button" onclick="openProductModal(${originalIndex})">
               ${imageHtml}
@@ -516,8 +525,8 @@
               <div class="price">${escapeHtml(p.PrecioMostrarTexto || '$')}</div>
               ${stockHtml}
               <div class="card-actions">
-                <button class="button" onclick="addToCart(${originalIndex})">Enviar a Carrito 🛒</button>
-                ${p.MostrarBotonFinal ? `<button class="button button-secondary" onclick="pedirIndividualWhatsApp(${originalIndex})">${escapeHtml(p.TextoBotonPedido || textoBotonDefault)}</button>` : ''}
+                <button class="button" ${btnAgregarDisabled} onclick="addToCart(${originalIndex})">Enviar a Carrito 🛒</button>
+                ${(p.MostrarBotonFinal && p.StockDisponible !== false) ? `<button class="button button-secondary" onclick="pedirIndividualWhatsApp(${originalIndex})">${escapeHtml(p.TextoBotonPedido || textoBotonDefault)}</button>` : ''}
               </div>
             </div>
           `;
@@ -550,9 +559,11 @@
         }
 
         const actions = document.getElementById('modalActions');
+        const disabledAttr = p.StockDisponible === false ? 'disabled' : '';
+
         actions.innerHTML = `
-          <button class="button" onclick="addToCart(${index}); closeModal('productModal');">Enviar a Carrito 🛒</button>
-          ${p.MostrarBotonFinal ? `<button class="button button-secondary" onclick="pedirIndividualWhatsApp(${index})">${escapeHtml(p.TextoBotonPedido || textoBotonDefault)}</button>` : ''}
+          <button class="button" ${disabledAttr} onclick="addToCart(${index}); closeModal('productModal');">Enviar a Carrito 🛒</button>
+          ${(p.MostrarBotonFinal && p.StockDisponible !== false) ? `<button class="button button-secondary" onclick="pedirIndividualWhatsApp(${index})">${escapeHtml(p.TextoBotonPedido || textoBotonDefault)}</button>` : ''}
         `;
 
         document.getElementById('productModal').classList.add('show');
@@ -570,9 +581,19 @@
 
       function addToCart(index) {
         const prod = productos[index];
-        const itemExistente = carrito.find(item => item.producto.NombreProducto === prod.NombreProducto);
+        if (prod.StockDisponible === false) {
+          alert('El producto se encuentra agotado.');
+          return;
+        }
+
+        const itemExistente = carrito.find(item => item.producto.ProductoID === prod.ProductoID);
+        const stockDisponible = Number(prod.StockValor);
 
         if (itemExistente) {
+          if (!isNaN(stockDisponible) && (itemExistente.cantidad + 1) > stockDisponible) {
+            alert(`No puedes solicitar más de ${stockDisponible} unidades disponibles de este producto.`);
+            return;
+          }
           itemExistente.cantidad++;
         } else {
           carrito.push({ producto: prod, cantidad: 1 });
@@ -633,8 +654,19 @@
       }
 
       function changeQty(index, delta) {
-        carrito[index].cantidad += delta;
-        if (carrito[index].cantidad <= 0) {
+        const item = carrito[index];
+        const nuevaCantidad = item.cantidad + delta;
+
+        if (delta > 0) {
+          const stockNum = Number(item.producto.StockValor);
+          if (!isNaN(stockNum) && nuevaCantidad > stockNum) {
+            alert(`Stock máximo alcanzado (${stockNum} disponibles).`);
+            return;
+          }
+        }
+
+        item.cantidad = nuevaCantidad;
+        if (item.cantidad <= 0) {
           carrito.splice(index, 1);
         }
         updateCartUI();
@@ -668,13 +700,19 @@
           return await response.json();
         } catch (err) {
           console.error("Error al registrar pedido:", err);
-          return { ok: false, numeroPedido: 'S/F' };
+          return { ok: false, message: 'Error de conexión con el servidor.' };
         }
       }
 
       /* Envío por WhatsApp formato Ticket */
       async function pedirIndividualWhatsApp(index) {
         const p = productos[index];
+
+        if (p.StockDisponible === false) {
+          alert("Este producto está agotado.");
+          return;
+        }
+
         const nombrePersona = prompt("A nombre de quien va el pedido:");
         if (!nombrePersona || !nombrePersona.trim()) return;
 
@@ -685,10 +723,20 @@
         }
 
         const items = [{ producto: p, cantidad: 1 }];
-        closeModal('productModal');
 
         // Guardar pedido y obtener folio
         const resServidor = await guardarPedidoEnServidor(nombrePersona.trim(), items);
+        
+        if (!resServidor.ok) {
+          alert('Error al registrar pedido: ' + resServidor.message);
+          return;
+        }
+
+        closeModal('productModal');
+
+        // Recargar inventario actualizado en pantalla
+        await cargarDatosCatalogo();
+
         const folio = resServidor.numeroPedido || 'S/F';
 
         // Estructura Ticket WhatsApp
@@ -732,6 +780,14 @@
 
         // Guardar pedido en servidor
         const resServidor = await guardarPedidoEnServidor(nombrePersona.trim(), carrito);
+        
+        if (!resServidor.ok) {
+          alert('No se pudo procesar el pedido:\n' + resServidor.message);
+          btnSend.disabled = false;
+          btnSend.textContent = 'Enviar Pedido por WhatsApp';
+          return;
+        }
+
         const folio = resServidor.numeroPedido || 'S/F';
 
         let total = 0;
@@ -747,10 +803,12 @@
 
         const totalFormateado = total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
 
-        // Cierre automático del modal y reseteo de carrito
+        // Cierre automático del modal, reseteo de carrito y recarga de catálogo
         closeModal('cartModal');
         carrito = [];
         updateCartUI();
+
+        await cargarDatosCatalogo();
 
         // Estructura Ticket WhatsApp
         let ticket = `🧾 *TICKET DE PEDIDO* 🧾\n`;
