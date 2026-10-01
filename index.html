@@ -704,6 +704,24 @@
         }
       }
 
+      /* Función Auxiliar: Apertura Directa de WhatsApp */
+      function abrirWhatsAppDirecto(phone, mensajeTexto) {
+        // Limpia el número de teléfono removiendo caracteres no numéricos
+        const numLimpio = String(phone).replace(/\D/g, '');
+        const textoCodificado = encodeURIComponent(mensajeTexto);
+
+        // Detectar si el usuario navega desde un dispositivo móvil
+        const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (esMovil) {
+          // Fuerza el enlace de esquema de la aplicación instalada sin pasar por api.whatsapp.com
+          window.location.href = `whatsapp://send?phone=${numLimpio}&text=${textoCodificado}`;
+        } else {
+          // En PC abre directamente WhatsApp Web en nueva pestaña
+          window.open(`https://web.whatsapp.com/send?phone=${numLimpio}&text=${textoCodificado}`, '_blank');
+        }
+      }
+
       /* Envío por WhatsApp formato Ticket */
       async function pedirIndividualWhatsApp(index) {
         const p = productos[index];
@@ -756,7 +774,8 @@
           ticket += `\n${p.TextoEnvio}`;
         }
 
-        window.location.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(ticket)}`;
+        // Llamada a la función de apertura directa
+        abrirWhatsAppDirecto(phone, ticket);
       }
 
       async function sendCartToWhatsApp() {
@@ -831,7 +850,8 @@
         btnSend.disabled = false;
         btnSend.textContent = 'Enviar Pedido por WhatsApp';
 
-        window.location.href = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(ticket)}`;
+        // Llamada a la función de apertura directa
+        abrirWhatsAppDirecto(phone, ticket);
       }
 
       function escapeHtml(text) {
