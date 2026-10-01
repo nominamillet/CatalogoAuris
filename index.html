@@ -526,7 +526,7 @@
               ${stockHtml}
               <div class="card-actions">
                 <button class="button" ${btnAgregarDisabled} onclick="addToCart(${originalIndex})">Enviar a Carrito 🛒</button>
-                ${(p.MostrarBotonFinal && p.StockDisponible !== false) ? `<button class="button button-secondary" onclick="pedirIndividualWhatsApp(${originalIndex})">${escapeHtml(p.TextoBotonPedido || textoBotonDefault)}</button>` : ''}
+                ${(p.MostrarBotonFinal && p.StockDisponible !== false) ? `<button class="button button-secondary" id="btnDirect_${originalIndex}" onclick="pedirIndividualWhatsApp(${originalIndex}, this)">${escapeHtml(p.TextoBotonPedido || textoBotonDefault)}</button>` : ''}
               </div>
             </div>
           `;
@@ -563,7 +563,7 @@
 
         actions.innerHTML = `
           <button class="button" ${disabledAttr} onclick="addToCart(${index}); closeModal('productModal');">Enviar a Carrito 🛒</button>
-          ${(p.MostrarBotonFinal && p.StockDisponible !== false) ? `<button class="button button-secondary" onclick="pedirIndividualWhatsApp(${index})">${escapeHtml(p.TextoBotonPedido || textoBotonDefault)}</button>` : ''}
+          ${(p.MostrarBotonFinal && p.StockDisponible !== false) ? `<button class="button button-secondary" onclick="pedirIndividualWhatsApp(${index}, this)">${escapeHtml(p.TextoBotonPedido || textoBotonDefault)}</button>` : ''}
         `;
 
         document.getElementById('productModal').classList.add('show');
@@ -706,7 +706,6 @@
 
       /* Función Auxiliar: Apertura Directa de WhatsApp */
       function abrirWhatsAppDirecto(phone, mensajeTexto) {
-        // Limpia el número de teléfono removiendo caracteres no numéricos
         const numLimpio = String(phone).replace(/\D/g, '');
         const textoCodificado = encodeURIComponent(mensajeTexto);
 
@@ -714,16 +713,16 @@
         const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         if (esMovil) {
-          // Fuerza el enlace de esquema de la aplicación instalada sin pasar por api.whatsapp.com
+          // En móviles abre directamente la app sin intermediarios
           window.location.href = `whatsapp://send?phone=${numLimpio}&text=${textoCodificado}`;
         } else {
-          // En PC abre directamente WhatsApp Web en nueva pestaña
-          window.open(`https://web.whatsapp.com/send?phone=${numLimpio}&text=${textoCodificado}`, '_blank');
+          // En PC usa la dirección oficial de la API de WhatsApp para abrir Web/Desktop directamente
+          window.open(`https://api.whatsapp.com/send?phone=${numLimpio}&text=${textoCodificado}`, '_blank');
         }
       }
 
-      /* Envío por WhatsApp formato Ticket */
-      async function pedirIndividualWhatsApp(index) {
+      /* Envío por WhatsApp formato Ticket (Compra Directa) */
+      async function pedirIndividualWhatsApp(index, btnElem) {
         const p = productos[index];
 
         if (p.StockDisponible === false) {
@@ -740,6 +739,14 @@
           return;
         }
 
+        // Modificar el estado del botón para indicar procesamiento
+        let textoOriginal = '';
+        if (btnElem) {
+          textoOriginal = btnElem.textContent;
+          btnElem.disabled = true;
+          btnElem.textContent = 'Procesando...';
+        }
+
         const items = [{ producto: p, cantidad: 1 }];
 
         // Guardar pedido y obtener folio
@@ -747,6 +754,10 @@
         
         if (!resServidor.ok) {
           alert('Error al registrar pedido: ' + resServidor.message);
+          if (btnElem) {
+            btnElem.disabled = false;
+            btnElem.textContent = textoOriginal;
+          }
           return;
         }
 
@@ -772,6 +783,11 @@
 
         if (p.TextoEnvio) {
           ticket += `\n${p.TextoEnvio}`;
+        }
+
+        if (btnElem) {
+          btnElem.disabled = false;
+          btnElem.textContent = textoOriginal;
         }
 
         // Llamada a la función de apertura directa
