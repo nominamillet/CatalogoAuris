@@ -708,16 +708,18 @@
       function abrirWhatsAppDirecto(phone, mensajeTexto) {
         const numLimpio = String(phone).replace(/\D/g, '');
         const textoCodificado = encodeURIComponent(mensajeTexto);
+        const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numLimpio}&text=${textoCodificado}`;
 
         // Detectar si el usuario navega desde un dispositivo móvil
         const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         if (esMovil) {
-          // En móviles abre directamente la app sin intermediarios
-          window.location.href = `whatsapp://send?phone=${numLimpio}&text=${textoCodificado}`;
+          // En móviles abre una nueva pestaña/ventana hacia el enlace oficial
+          // Esto activa el Intent nativo del SO para abrir la App de WhatsApp sin preguntar ni cerrar el catálogo
+          window.open(urlWhatsApp, '_blank');
         } else {
-          // En PC usa la dirección oficial de la API de WhatsApp para abrir Web/Desktop directamente
-          window.open(`https://api.whatsapp.com/send?phone=${numLimpio}&text=${textoCodificado}`, '_blank');
+          // En PC abre WhatsApp Web / Escritorio en una pestaña nueva
+          window.open(urlWhatsApp, '_blank');
         }
       }
 
